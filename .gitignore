@@ -1,0 +1,6 @@
+.idea
+*.ini
+db.sqlite3
+client-secrets.json
+.vscode
+.env
