@@ -1,16 +1,14 @@
-from re import escape
+import json
 import logging
-import time
 import urllib
 from datetime import date
-import schedule
 
 from django.http import HttpResponse, HttpResponseNotFound
 from rest_framework import permissions
 from rest_framework import viewsets
 import requests
 
-from .utils import getMatchingVideo, getproperty, getTracksFromPlaylist
+from .utils import download_audio, getMatchingVideoId, getproperty, getTracksFromPlaylist
 from .models import Playlist, Track
 from .serializers import PlayListSerializer
 from .auth import Auth
@@ -32,45 +30,45 @@ def syncplaylists(request):
       return HttpResponseNotFound(res.json())
 
     if not Playlist.objects.filter(pk=id).exists():
-      print(f'have not seen this playlist id {id} before!')
+      print(f'Saving new playlist id {id}')
       json = res.json()
       playlist = Playlist()
       playlist.id = json['id']
       playlist.name = json['name']
       playlist.description = json['description']
       playlist.created_date = date.today()
-      playlist.save()
+      playlist.save()      
       print(f'Playlist [{playlist.name}] saved')
+    playlist = Playlist.objects.filter(pk=id).first()
+    synctracks(playlist.name, res.json())
   return HttpResponse('Sync Completed')
 
-def syncSongs(request):
-  auth = Auth()
-  url = getproperty('music', 'url')
-  playlists = Playlist.objects.all()
-  for p in playlists:
-    res = requests.get(url=f'{url}/playlists/{p.id}', headers={'Authorization': f'Bearer {auth.get_access_token()}'})
-    if res.status_code == 404:
-      logger.error(f'Error getting playlist with id {id}, error: {res.json()}')
-      continue
-
-    tracks = getTracksFromPlaylist(res.json())
-    if len(tracks) > 0:
-      for t in tracks:
-        if Track.objects.filter(pk=t.id).exists():
-          logger.info(f'track id {id} already exists')
-          continue
-        logger.info(f'have not seen this track id {id} before')
+def synctracks(playlist_name, playlist_json):
+  print(f'syncing tracks for playlist - {playlist_name}')
+  tracks = getTracksFromPlaylist(playlist_json)
+  if len(tracks) > 0:
+    for t in tracks:
+      if not Track.objects.filter(pk=t.id).exists():
+        print(f'Adding new track id {t.id}')
         t.save()
   return HttpResponse("Success")
 
 
-def syncContent(request):
-  logger.info('Syncing Audio files with database')
-  for track in Track.objects.all():
-    query = urllib.parse.quote(track.name)
-    getMatchingVideo(query)
+def synccontent(request):
+  unsynced = Track.objects.filter(downloaded=False).count()
+  total = Track.objects.count()
+  print(f'Syncing Audio files with database - total: {total}, synced: {total-unsynced}, unsynced: {unsynced}')
+  download_destination = getproperty('music', 'destination_location')
+  for track in Track.objects.filter(downloaded=False):
+    param_artists = ' '.join(json.loads(track.artists)) # get all artist names in a space separated string
+    query = urllib.parse.quote(f'{track.name} {param_artists}')
+    videoId = getMatchingVideoId(query)
+    if videoId != None:
+      download_audio(videoId, f'{download_destination}/{track.playlist.name}')
+      track.downloaded = True
+      track.save()
 
-  return HttpResponse(f'Synced {Track.objects.count()} tracks')
+  return HttpResponse(f'Synced {unsynced} tracks ~!')
 
 class PlaylistViewSet(viewsets.ModelViewSet):
   """

@@ -32,9 +32,6 @@ def getTracksFromPlaylist(remotePlaylist):
     remoteTracks = remotePlaylist['tracks']['items']
     for t in remoteTracks:
         remoteTrack = t['track']
-        # print(f'syncing track {remoteTrack["name"]}')
-        # if 'artists' not in track:
-        #     print(f'track {track["name"]} does not have an artist')
         artists = [str(artist['name']) for artist in remoteTrack['artists']]
 
         track = Track()
@@ -46,7 +43,6 @@ def getTracksFromPlaylist(remotePlaylist):
         track.created_date = date.today()
         tracks.append(track)
     return tracks
-
 
 def getVideoIdsFromSearch(query):
     config = configparser.ConfigParser()
@@ -60,23 +56,21 @@ def getVideoIdsFromSearch(query):
         return video_ids
     return []
 
-
-def getMatchingVideo(query):
+def getMatchingVideoId(query):
     config = configparser.ConfigParser()
     config.read('properties.ini')
     url = config['youtube']['url']
     key = config['youtube']['api_key']
 
-    video_ids = []
-
     response = requests.get(url + '/search' + f'?key={key}&q={query}')
     if response.status_code == 200:
         items = response.json()['items']
-        video_ids = list(map(lambda x: x['id']['videoId'], items))
-        download_audio(video_ids[0])
-    else:
-        print('Error in query for video IDs')
-        return
+        for i in items:
+            if 'videoId' in i['id']:
+                return i['id']['videoId']
+
+    print(f'Could not find any videos for query - {query}')
+    return None
 
 def getBestMatch(items, text):
     scores = []
@@ -106,17 +100,19 @@ def clean_text(text):
     text = ' '.join([word for word in text.split() if word not in stopwords])
     return text
 
-def download_audio(video_id):
-    config = configparser.ConfigParser()
-    config.read('properties.ini')
-    url = config['youtube']['public_url']
-    destination_location = config['music']['destination_location']
+def getArtistNames(arists_json):
+    json = json.load(arists_json)
+    
+
+
+def download_audio(video_id, destination_path):
+    url = getproperty('youtube', 'public_url')
 
     yt = YouTube(
         f'{url}/watch?v={video_id}',
         on_progress_callback=log_progress,
         on_complete_callback=log_completed)
-    yt.streams.filter(only_audio=True).first().download(destination_location)
+    yt.streams.filter(only_audio=True).first().download(destination_path)
 
 def log_progress(a,b,c):
     logger.info(f'Downloading')

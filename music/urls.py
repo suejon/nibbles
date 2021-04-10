@@ -9,7 +9,6 @@ router.register(r'playlists', views.PlaylistViewSet)
 urlpatterns = [
   path('', include(router.urls)),
   path('', views.index, name='index'),
-  path('syncPlaylists', views.syncplaylists, name='syncPlaylists'),
-  path('syncSongs', views.syncSongs, name='syncSongs'),
-  path('syncContent', views.syncContent, name='syncContent')
+  path('syncplaylists', views.syncplaylists, name='syncplaylists'),
+  path('synccontent', views.synccontent, name='synccontent')
 ]

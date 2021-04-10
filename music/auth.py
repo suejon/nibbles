@@ -13,10 +13,10 @@ class Auth():
     access_token_expiration = None
 
     def __init__(self):
-        self.auth_server_url = getproperty('auth', 'url')
-        self.client_id = getproperty('auth', 'client_id')
-        self.client_secret = getproperty('auth', 'client_secret')
-        self.grant_type = getproperty('auth', 'grant_type')
+        self.auth_server_url = getproperty('spotify_auth', 'url')
+        self.client_id = getproperty('spotify_auth', 'client_id')
+        self.client_secret = getproperty('spotify_auth', 'client_secret')
+        self.grant_type = getproperty('spotify_auth', 'grant_type')
 
         self.get_access_token()
         if self.access_token is None:

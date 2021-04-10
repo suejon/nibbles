@@ -24,3 +24,4 @@ class Track(models.Model):
   location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
   created_date = models.DateField('date created', auto_created=True)
   video_id = models.CharField(max_length=255, null=True)
+  downloaded = models.BooleanField(default=False)
