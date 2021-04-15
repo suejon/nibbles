@@ -64,9 +64,12 @@ def synccontent(request):
     query = urllib.parse.quote(f'{track.name} {param_artists}')
     videoId = getMatchingVideoId(query)
     if videoId != None:
-      download_audio(videoId, f'{download_destination}/{track.playlist.name}')
-      track.downloaded = True
-      track.save()
+      downloaded = download_audio(videoId, f'{download_destination}/{track.playlist.name}')
+      if downloaded:
+        track.downloaded = True
+        track.save()
+      else:
+        print(f'Error downloading audio for query - {query}')
 
   return HttpResponse(f'Synced {unsynced} tracks ~!')
 

@@ -40,11 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'django_cron'
-]
-
-CRON_CLASSES = [
-    'music.cron.MusicCronJob'
+    'background_task'
 ]
 
 MIDDLEWARE = [

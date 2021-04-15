@@ -44,18 +44,6 @@ def getTracksFromPlaylist(remotePlaylist):
         tracks.append(track)
     return tracks
 
-def getVideoIdsFromSearch(query):
-    config = configparser.ConfigParser()
-    config.read('properties.ini')
-    url = config['youtube']['url']
-
-    response = requests.get(url + '/search' + f'?key={key}&q={query}')
-    if response.status_code == 200:
-        items = response.json()['items']
-        video_ids = list(map(lambda x: x['id'], items))
-        return video_ids
-    return []
-
 def getMatchingVideoId(query):
     config = configparser.ConfigParser()
     config.read('properties.ini')
@@ -68,8 +56,11 @@ def getMatchingVideoId(query):
         for i in items:
             if 'videoId' in i['id']:
                 return i['id']['videoId']
+    if response.status_code == 403:
+        print('Hitting too many times, exiting')
+        exit()
 
-    print(f'Could not find any videos for query - {query}')
+    print(f'Could not find any videos for query - {query}, response: {response}')
     return None
 
 def getBestMatch(items, text):
@@ -102,7 +93,6 @@ def clean_text(text):
 
 def getArtistNames(arists_json):
     json = json.load(arists_json)
-    
 
 
 def download_audio(video_id, destination_path):
@@ -110,12 +100,12 @@ def download_audio(video_id, destination_path):
 
     yt = YouTube(
         f'{url}/watch?v={video_id}',
-        on_progress_callback=log_progress,
         on_complete_callback=log_completed)
-    yt.streams.filter(only_audio=True).first().download(destination_path)
-
-def log_progress(a,b,c):
-    logger.info(f'Downloading')
+    audio = yt.streams.filter(only_audio=True).first()
+    if audio is None:
+        return False
+    audio.download(destination_path)
+    return True
 
 def log_completed(a,b):
-    logger.info(f'Download Complete')
+    print(f'Download Complete')
