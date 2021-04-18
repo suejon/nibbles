@@ -48,7 +48,7 @@ def synctracks(playlist_name, playlist_json):
   tracks = getTracksFromPlaylist(playlist_json)
   if len(tracks) > 0:
     for t in tracks:
-      if not Track.objects.filter(pk=t.id).exists():
+      if not None and not Track.objects.filter(pk=t.id).exists():
         print(f'Adding new track id {t.id}')
         t.save()
   return HttpResponse("Success")
