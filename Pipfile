@@ -13,9 +13,8 @@ requests = "*"
 sklearn = "*"
 nltk = "*"
 pytube = "*"
-django_cron = "*"
-django-background-tasks = "*"
 mutagen = "*"
+daphne = "*"
 
 [requires]
 python_version = "3.7"
