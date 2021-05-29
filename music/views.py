@@ -4,11 +4,11 @@ import urllib
 from datetime import date
 
 from django.http import HttpResponse, HttpResponseNotFound
-from rest_framework import permissions
+from rest_framework import permissions, utils
 from rest_framework import viewsets
 import requests
 
-from .utils import download_audio, getMatchingVideoId, getproperty, getTracksFromPlaylist
+from .utils import download_audio, getMatchingVideoId, getPlaylistIds, getproperty, getTracksFromPlaylist
 from .models import Playlist, Track
 from .serializers import PlayListSerializer
 from .auth import Auth
@@ -22,7 +22,7 @@ def index(request):
 def syncplaylists(request):
   auth = Auth()
   url = getproperty('music', 'url')
-  playlist_ids = getproperty('music', 'playlist_ids').split(',')
+  playlist_ids = getPlaylistIds()
   for id in playlist_ids:
     res = requests.get(url=f'{url}/playlists/{id}', headers={'Authorization': f'Bearer {auth.get_access_token()}'})
     if res.status_code == 404:
@@ -62,8 +62,9 @@ def synccontent(request):
   for track in Track.objects.filter(downloaded=False):
     param_artists = ' '.join(json.loads(track.artists)) # get all artist names in a space separated string
     query = urllib.parse.quote(f'{track.name} {param_artists}')
-    videoId = getMatchingVideoId(query)
+    videoId = getMatchingVideoId(query, track)
     if videoId != None:
+      track.videoId = videoId
       downloaded = download_audio(videoId, f'{download_destination}/{track.playlist.name}')
       if downloaded:
         track.downloaded = True

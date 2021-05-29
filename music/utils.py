@@ -44,7 +44,10 @@ def getTracksFromPlaylist(remotePlaylist):
         tracks.append(track)
     return tracks
 
-def getMatchingVideoId(query):
+def getMatchingVideoId(query, track):
+    if track.video_id:
+        return track.video_id
+
     config = configparser.ConfigParser()
     config.read('properties.ini')
     url = config['youtube']['url']
@@ -115,3 +118,9 @@ def download_audio(video_id, destination_path):
 
 def log_completed(a,b):
     print(f'Download Complete')
+
+def getPlaylistIds():
+    playlistIds = []
+    with open('playlists.txt') as f:
+        playlistIds = [line.rstrip('\n') for line in f]
+    return playlistIds
