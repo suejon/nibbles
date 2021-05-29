@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1:8000']
 
 
 # Application definition
@@ -126,12 +126,12 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_PRELOAD = True
-SECURE_HSTS_SECONDS = 60
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-DEBUG = False
-# DEBUG = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True
+# SECURE_HSTS_PRELOAD = True
+# SECURE_HSTS_SECONDS = 60
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+# DEBUG = False
+DEBUG = True
