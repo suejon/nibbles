@@ -98,14 +98,14 @@ def getArtistNames(arists_json):
     json = json.load(arists_json)
 
 
-def download_audio(video_id, destination_path):
+def download_audio(track, video_id, destination_path):
     url = getproperty('youtube', 'public_url')
 
     try:
         yt = YouTube(
             f'{url}/watch?v={video_id}',
             on_complete_callback=log_completed)
-        print(f' Downloading: {url}/watch?v={video_id}')
+        print(f' Downloading: song - {track.name}, link - {url}/watch?v={video_id}')
         audio = yt.streams.filter(only_audio=True).first()
         if audio is None:
             return False

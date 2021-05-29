@@ -65,7 +65,7 @@ def synccontent(request):
     videoId = getMatchingVideoId(query, track)
     if videoId != None:
       track.videoId = videoId
-      downloaded = download_audio(videoId, f'{download_destination}/{track.playlist.name}')
+      downloaded = download_audio(track, videoId, f'{download_destination}/{track.playlist.name}')
       if downloaded:
         track.downloaded = True
         track.save()
